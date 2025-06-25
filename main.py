@@ -16,12 +16,19 @@ while True:
     opcao = input(menu).strip().lower()
 
     if opcao == "e":
-        print(f"""
+        if extrato != "":
+            print(f"""
 Saldo atual: {saldo}
 
 ========== EXTRATO ==========
 
 {extrato}
+""")
+        else:
+            print(f"""
+Saldo atual: {saldo}
+                  
+Não foram realizadas movimentações
 """)
         
     elif opcao == "d":
