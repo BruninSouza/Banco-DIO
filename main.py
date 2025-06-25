@@ -9,10 +9,8 @@ menu = """
 saldo = 0
 numero_saques = 0
 LIMITE = 500
-LIMITE_SAQUE = 3
-
-saques = []
-depositos = []
+LIMITE_SAQUE = 2
+extrato = ""
 
 while True:
     opcao = input(menu).strip().lower()
@@ -20,8 +18,10 @@ while True:
     if opcao == "e":
         print(f"""
 Saldo atual: {saldo}
-Depositos realizados: {depositos}
-Saques realizados: {saques}
+
+========== EXTRATO ==========
+
+{extrato}
 """)
         
     elif opcao == "d":
@@ -29,7 +29,7 @@ Saques realizados: {saques}
             valor_deposito = float(input("Digite quanto será depositado: "))
             if valor_deposito > 0:
                 saldo += valor_deposito
-                depositos.append(valor_deposito)
+                extrato += f"Depósito: R$ {valor_deposito:.2f}\n" 
             else: print ("Não pode-se depositar valor negativo! Tente novamente")
         except ValueError: print("Por favor Digite um valor válido!")
 
@@ -52,7 +52,7 @@ Saques realizados: {saques}
             elif excedeu_limite: print("Não se pode sacar mais do que 500 reais!")
             elif not saque_negativo:
                 saldo -= valor_saque
-                saques.append(valor_saque)
+                extrato += f"Saque: R$ {valor_saque:.2f}\n"                 
                 numero_saques += 1
         except ValueError: print("Por favor Digite um valor válido!") 
     
