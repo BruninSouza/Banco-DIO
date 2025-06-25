@@ -43,7 +43,7 @@ Saldo atual: {saldo}
             elif excedeu_saques: print("Limite máximo de 3 saques diários atingido"); continue
 
             valor_saque = float(input("Digite quanto será sacado: "))
-            excedeu_limite = valor_saque >= LIMITE
+            excedeu_limite = valor_saque > LIMITE
             excedeu_saldo = valor_saque > saldo
             saque_negativo = valor_saque < 0
             
