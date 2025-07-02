@@ -1,13 +1,16 @@
 import textwrap
+from datetime import datetime
+
 def menu():
     menu = """
 ========== Menu ==========
 [e]\textrato
 [d]\tdeposito
 [s]\tsacar
+[cn]\tcriar Cliente
+[cc]\tCriar Conta
 [q]\tsair
 => """
-
     return input(textwrap.dedent(menu))
 
 def visualizar_extrato(saldo, /, *, extrato):
@@ -54,13 +57,29 @@ def depositar(saldo, valor, extrato):
 
     return saldo, extrato
 
+def criar_usuario(nome, data_nascimento, cpf, endereco):
+    usuario = {}
+    usuario["Nome"] = nome
+    usuario["Data de Nascimento: "] = data_nascimento
+    usuario["CPF"] = cpf
+    usuario["Endereco"] = endereco
+
+    return usuario
+
+def criar_conta(agencia, numero_conta, usuario):
+    conta = {}
+    conta["Agencia"] = agencia
+    conta["Numero da Conta"] = numero_conta
+    conta["Usuario"] = usuario
+    return conta, numero_conta
+
 def main():
     LIMITE = 500
-    LIMITE_TRANSACAO = 2
     LIMITE_SAQUES = 3
     AGENCIA = "0001"
 
     saldo = 0
+    num_conta = 0
     numero_saques = 0
     extrato = " "
     usuarios = []
@@ -77,7 +96,7 @@ def main():
                 valor_deposito = float(input("Digite quanto será depositado: "))
                     
                 saldo, extrato = depositar(saldo, valor_deposito, extrato)
-            except ValueError: print("@@@ Por favor, Digite um valor válido!! @@@")
+            except ValueError: print("\n@@@ Por favor, Digite um valor válido!! @@@")
             
 
         elif opcao == "s":
@@ -92,7 +111,37 @@ def main():
                                         limite = LIMITE, 
                                         numero_saques = numero_saques, 
                                         limites_saque=LIMITE_SAQUES)
-            except ValueError: print("@@@ Por favor, Digite um valor válido!! @@@")
+            except ValueError: print("\n@@@ Por favor, Digite um valor válido!! @@@")
+        
+        elif opcao == "cn":
+            try: 
+                nome = input("Digite seu nome: ")
+                data_nascimento = datetime.strptime(input("Digite sua data de nascimento (ex: dd-mm-yyyy): "), "%d-%m-%Y")
+                data = data_nascimento.strftime("%d-%m-%Y")
+                cpf = input("Digite seu CPF (EX: xxx.xxx.xxx-xx): ")
+                if usuarios != []:
+                    for _ in usuarios:
+                        if _["CPF"] == cpf:
+                            print("\n@@@ Usuário já está castrado @@@")
+                else:
+                    endereco = input("Qual seu endereço: ")
+                    usuario = criar_usuario(nome, data, cpf, endereco)
+                    usuarios.append(usuario)
+            except ValueError: print("\n@@@ Por favor, Digite um valor válido!! @@@")
+
+        elif opcao == "cc":
+            if usuarios != []:
+                cpf_usuario = input("Digite o CPF que será associado à conta (xxx.xxx.xxx-xx): ")
+                for _ in usuarios:
+                    if _["CPF"] == cpf_usuario:
+                        usuario_selecionado = _
+                        conta,num_conta = criar_conta(agencia=AGENCIA, 
+                            numero_conta=num_conta+1, 
+                            usuario=usuario_selecionado)
+                        contas.append(conta)
+                        break
+                else: print("\n @@@ Usuário Não existe @@@")
+            else: print("\n@@@ Não há usuários cadastrados no sistema @@@")
         
         elif opcao == "q":
             break
