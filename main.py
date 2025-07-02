@@ -66,8 +66,6 @@ def main():
     usuarios = []
     contas = []
 
-    menu()
-
     while True:
         opcao = menu()
 
@@ -75,22 +73,26 @@ def main():
             print(visualizar_extrato(saldo, extrato = extrato))   
             
         elif opcao == "d":
-            valor_deposito = float(input("Digite quanto será depositado: "))
-                
-            saldo, extrato = depositar(saldo, valor_deposito, extrato)
+            try:
+                valor_deposito = float(input("Digite quanto será depositado: "))
+                    
+                saldo, extrato = depositar(saldo, valor_deposito, extrato)
+            except ValueError: print("@@@ Por favor, Digite um valor válido!! @@@")
             
 
         elif opcao == "s":
             saldo_zerado = saldo <= 0
-            if saldo_zerado: print("\n@@@ Sua conta está sem saldo para ser sacado! @@@")
+            if saldo_zerado: print("\n@@@ Sua conta está sem saldo para ser sacado! @@@"); continue
 
-            valor_saque = float(input("Digite quanto será sacado: "))
-            saldo, extrato = sacar(saldo = saldo, 
-                                    valor = valor_saque, 
-                                    extrato = extrato, 
-                                    limite = LIMITE, 
-                                    numero_saques = numero_saques, 
-                                    limites_saque=LIMITE_SAQUES)
+            try:
+                valor_saque = float(input("Digite quanto será sacado: "))
+                saldo, extrato = sacar(saldo = saldo, 
+                                        valor = valor_saque, 
+                                        extrato = extrato, 
+                                        limite = LIMITE, 
+                                        numero_saques = numero_saques, 
+                                        limites_saque=LIMITE_SAQUES)
+            except ValueError: print("@@@ Por favor, Digite um valor válido!! @@@")
         
         elif opcao == "q":
             break
