@@ -1,4 +1,16 @@
-def fucntio_extrato(saldo, /, *, extrato):
+import textwrap
+def menu():
+    menu = """
+========== Menu ==========
+[e]\textrato
+[d]\tdeposito
+[s]\tsacar
+[q]\tsair
+=> """
+
+    return input(textwrap.dedent(menu))
+
+def visualizar_extrato(saldo, /, *, extrato):
     if extrato != "":
         extrato = f"""
 Saldo atual: {saldo}
@@ -15,74 +27,74 @@ Não foram realizadas movimentações
 """
     return extrato
 
-def saque(*,saldo, valor, extrato, limite, numero_saques, limites_saque):
-    saldo -= valor
-    extrato += f"Saque: R$ {valor_saque:.2f}\n"                 
-    numero_saques += 1
+def sacar(*,saldo, valor, extrato, limite, numero_saques, limites_saque):
+    excedeu_saques = numero_saques > limites_saque
+    excedeu_limite = valor > limite
+    excedeu_saldo = valor > saldo
+    saque_negativo = valor < 0
+
+    if excedeu_saques: print("\n@@@ Limite máximo de 3 saques diários atingido @@@")
+    elif saque_negativo: print ("\n@@@ Não pode-se sacar valor negativo! Tente novamente @@@")
+    elif excedeu_saldo: print("\n@@@ Não se pode sacar um valor superior ao que está na conta! @@@")
+    elif excedeu_limite: print("\n@@@ Não se pode sacar mais do que 500 reais! @@@")
+    elif not saque_negativo:
+        saldo -= valor
+        extrato += f"Saque: R$ {valor:.2f}\n"                 
+        numero_saques += 1
+        print("=== Saque realizado com Sucesso!! ===")
+
     return saldo, extrato
 
-def deposito(saldo, valor, extrato):
-    saldo += valor
-    extrato += f"Depósito: R$ {valor:.2f}\n"
+def depositar(saldo, valor, extrato):
+    if valor >= 0:
+            saldo += valor
+            extrato += f"Depósito: R$ {valor:.2f}\n"
+            print("=== Depósito realizado com Sucesso!! ===")
+    else: print ("\n@@@ Não pode-se depositar valor negativo! Tente novamente @@@")
+
     return saldo, extrato
 
-menu = """
-[e] extrato
-[d] deposito
-[s] sacar
-[q] sair
-[p] print saldo
-=> """
+def main():
+    LIMITE = 500
+    LIMITE_TRANSACAO = 2
+    LIMITE_SAQUES = 3
+    AGENCIA = "0001"
 
-saldo = 0
-numero_saques = 0
-LIMITE = 500
-LIMITE_SAQUE = 2
-extrato = ""
+    saldo = 0
+    numero_saques = 0
+    extrato = " "
+    usuarios = []
+    contas = []
 
-while True:
-    opcao = input(menu).strip().lower()
+    menu()
 
-    if opcao == "e":
-        print(fucntio_extrato(saldo, extrato = extrato))   
-        
-    elif opcao == "d":
-        try:
+    while True:
+        opcao = menu()
+
+        if opcao == "e":
+            print(visualizar_extrato(saldo, extrato = extrato))   
+            
+        elif opcao == "d":
             valor_deposito = float(input("Digite quanto será depositado: "))
-            if valor_deposito >= 0:
-                saldo = deposito(saldo, valor_deposito, extrato)[0]
-                extrato = deposito(saldo, valor_deposito, extrato)[1]
-            else: print ("Não pode-se depositar valor negativo! Tente novamente")
-        except ValueError: print("Por favor Digite um valor válido!")
+                
+            saldo, extrato = depositar(saldo, valor_deposito, extrato)
+            
 
-    elif opcao == "s":
-
-        saque(saldo = saldo, valor = valor_saque, extrato = extrato, 
-              limite = LIMITE, numero_saques = numero_saques, limites_saque=LIMITE_SAQUE)
-
-        saldo_zerado = saldo <= 0
-        excedeu_saques = numero_saques > LIMITE_SAQUE
-
-        try: 
-            if saldo_zerado: print("Sua conta está sem saldo para ser sacado!"); continue
-            elif excedeu_saques: print("Limite máximo de 3 saques diários atingido"); continue
+        elif opcao == "s":
+            saldo_zerado = saldo <= 0
+            if saldo_zerado: print("\n@@@ Sua conta está sem saldo para ser sacado! @@@")
 
             valor_saque = float(input("Digite quanto será sacado: "))
-            excedeu_limite = valor_saque > LIMITE
-            excedeu_saldo = valor_saque > saldo
-            saque_negativo = valor_saque < 0
-            
-            if saque_negativo: print ("Não pode-se sacar valor negativo! Tente novamente")
-            elif excedeu_saldo: print("Não se pode sacar um valor superior ao que está na conta!")
-            elif excedeu_limite: print("Não se pode sacar mais do que 500 reais!")
-            elif not saque_negativo:
-                saldo = saque(saldo = saldo, valor = valor_saque, extrato = extrato, 
-                    limite = LIMITE, numero_saques = numero_saques, limites_saque=LIMITE_SAQUE)[0]
-                saldo = saque(saldo = saldo, valor = valor_saque, extrato = extrato, 
-                    limite = LIMITE, numero_saques = numero_saques, limites_saque=LIMITE_SAQUE)[1]
-        except ValueError: print("Por favor Digite um valor válido!")
-    
-    elif opcao == "q":
-        break
+            saldo, extrato = sacar(saldo = saldo, 
+                                    valor = valor_saque, 
+                                    extrato = extrato, 
+                                    limite = LIMITE, 
+                                    numero_saques = numero_saques, 
+                                    limites_saque=LIMITE_SAQUES)
+        
+        elif opcao == "q":
+            break
 
-    else: print("Opção inválida, por favor selecione novamente uma operação válida")
+        else: print("Opção inválida, por favor selecione novamente uma operação válida")
+
+main()
