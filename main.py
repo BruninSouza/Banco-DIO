@@ -9,6 +9,7 @@ def menu():
 [s]\tsacar
 [cn]\tcriar Cliente
 [cc]\tCriar Conta
+[ls]\tListas Contas
 [q]\tsair
 => """
     return input(textwrap.dedent(menu))
@@ -57,21 +58,44 @@ def depositar(saldo, valor, extrato):
 
     return saldo, extrato
 
-def criar_usuario(nome, data_nascimento, cpf, endereco):
-    usuario = {}
-    usuario["Nome"] = nome
-    usuario["Data de Nascimento: "] = data_nascimento
-    usuario["CPF"] = cpf
-    usuario["Endereco"] = endereco
+def filtrar_usuario(usuarios, cpf):
+    for _ in usuarios:
+            if _["cpf"] == cpf: return _
+            else: return False
 
+def criar_usuario(usuarios):
+    cpf = input("Digite seu CPF (EX: xxx.xxx.xxx-xx): ")
+    usuario = filtrar_usuario(usuarios, cpf)
+    if usuario: print("\n Já existe usuário com esse CPF"); return
+
+    nome = input("Digite seu nome: ")
+    data_nascimento = datetime.strptime(input("Digite sua data de nascimento (ex: dd-mm-yyyy): "), "%d-%m-%Y")
+    data = data_nascimento.strftime("%d-%m-%Y")
+    endereco = input("Digite seu endereço (logradouro, nro - bairro - cidade/UF)")
+
+    usuarios.append({"cpf": cpf, "nome":nome, "data_nascimento": data, "endereco": endereco})
+    print ("\n === Usuário cadastrado com sucesso!! ===")
     return usuario
 
-def criar_conta(agencia, numero_conta, usuario):
-    conta = {}
-    conta["Agencia"] = agencia
-    conta["Numero da Conta"] = numero_conta
-    conta["Usuario"] = usuario
-    return conta, numero_conta
+def criar_conta(agencia, num_conta, usuarios):
+    if usuarios == []: return "\n @@@ Não há usuários cadastrados no sistema @@@"
+    cpf_usuario = input("Digite o CPF que será associado à conta (xxx.xxx.xxx-xx): ")
+    usuario = filtrar_usuario(usuarios, cpf_usuario)
+    if usuario: 
+        print("\n === Conta criada com sucesso!! ===")
+        return {"agencia": agencia, "numero_conta": num_conta, "usuario":usuario}
+
+    return "\n@@@ Usuário não encontrado @@@"
+
+def listar_contas(contas):
+    for conta in contas:
+        linha = f"""
+            agência:\t{conta["agencia"]}
+            C/C:\t{conta["numero_conta"]}
+            titular:\t{conta["usuario"]["nome"]}
+        """
+        print("=" * 100)
+        print(textwrap.dedent(linha))
 
 def main():
     LIMITE = 500
@@ -79,7 +103,6 @@ def main():
     AGENCIA = "0001"
 
     saldo = 0
-    num_conta = 0
     numero_saques = 0
     extrato = " "
     usuarios = []
@@ -115,34 +138,20 @@ def main():
         
         elif opcao == "cn":
             try: 
-                nome = input("Digite seu nome: ")
-                data_nascimento = datetime.strptime(input("Digite sua data de nascimento (ex: dd-mm-yyyy): "), "%d-%m-%Y")
-                data = data_nascimento.strftime("%d-%m-%Y")
-                cpf = input("Digite seu CPF (EX: xxx.xxx.xxx-xx): ")
-                if usuarios != []:
-                    for _ in usuarios:
-                        if _["CPF"] == cpf:
-                            print("\n@@@ Usuário já está castrado @@@")
-                else:
-                    endereco = input("Qual seu endereço: ")
-                    usuario = criar_usuario(nome, data, cpf, endereco)
-                    usuarios.append(usuario)
+                criar_usuario(usuarios)
             except ValueError: print("\n@@@ Por favor, Digite um valor válido!! @@@")
 
         elif opcao == "cc":
-            if usuarios != []:
-                cpf_usuario = input("Digite o CPF que será associado à conta (xxx.xxx.xxx-xx): ")
-                for _ in usuarios:
-                    if _["CPF"] == cpf_usuario:
-                        usuario_selecionado = _
-                        conta,num_conta = criar_conta(agencia=AGENCIA, 
-                            numero_conta=num_conta+1, 
-                            usuario=usuario_selecionado)
-                        contas.append(conta)
-                        break
-                else: print("\n @@@ Usuário Não existe @@@")
-            else: print("\n@@@ Não há usuários cadastrados no sistema @@@")
-        
+            num_conta = len(contas) + 1
+            conta = criar_conta(AGENCIA, 
+                            num_conta, 
+                            usuarios)
+            if conta:
+                contas.append(conta)
+
+        elif opcao == "ls":
+            listar_contas(contas)
+
         elif opcao == "q":
             break
 
