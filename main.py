@@ -1,4 +1,4 @@
-import textwrap
+import textwrap # Permite escrever em string (""") sem precisar respeitar identação
 from datetime import datetime
 
 def menu():
@@ -17,17 +17,17 @@ def menu():
 def visualizar_extrato(saldo, /, *, extrato):
     if extrato != "":
         extrato = f"""
-Saldo atual: {saldo}
+        Saldo atual: {saldo}
 
-========== EXTRATO ==========
+        ========== EXTRATO ==========
 
-{extrato}
+        {extrato}
 """
     else:
         extrato = f"""
-Saldo atual: {saldo}
-                  
-Não foram realizadas movimentações
+        Saldo atual: {saldo}
+                        
+        Não foram realizadas movimentações
 """
     return extrato
 
@@ -143,9 +143,7 @@ def main():
 
         elif opcao == "cc":
             num_conta = len(contas) + 1
-            conta = criar_conta(AGENCIA, 
-                            num_conta, 
-                            usuarios)
+            conta = criar_conta(AGENCIA, num_conta, usuarios)
             if conta:
                 contas.append(conta)
 
