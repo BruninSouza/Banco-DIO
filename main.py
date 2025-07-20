@@ -1,5 +1,6 @@
 from Logica import Logica
+from datetime import datetime
 
 if __name__ == "__main__":
-    meu_jogo = Logica()
-    meu_jogo.Logica()
+    banco = Logica()
+    banco
