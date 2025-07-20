@@ -1,67 +1,83 @@
 import textwrap
+from datetime import datetime
+
 from Conta import Conta, ContaCorrente
 from Historico import Historico
 from Transacao import Saque, Deposito, Transacao
 from Cliente import Cliente, PessoaFisica
 
 class Logica:
-    def menu():
-        menu = """
-    ========== Menu ==========
-    [e]\textrato
-    [d]\tdeposito
-    [s]\tsacar
-    [cn]\tcriar Cliente
-    [cc]\tCriar Conta
-    [ls]\tListas Contas
-    [q]\tsair
-    => """
+
+    def __init__(self):
+        self._clientes = []
+        self._contas = []
+
+    @property
+    def clientes(self):
+        return self._clientes    
+
+    @property
+    def contas(self):
+        return self._contas 
+        
+    def menu(self):
+        menu = """\n
+        ================ MENU ================
+        [d]\tDepositar
+        [s]\tSacar
+        [e]\tExtrato
+        [nc]\tNova conta
+        [lc]\tListar contas
+        [nu]\tNovo usuário
+        [q]\tSair
+        => """
         return input(textwrap.dedent(menu))
 
 
-    def filtrar_cliente(cpf, clientes):
-        clientes_filtrados = [cliente for cliente in clientes if cliente.cpf == cpf]
+
+    def filtrar_cliente(self, cpf):
+        clientes_filtrados = [cliente for cliente in self.clientes if cliente.cpf == cpf]
         return clientes_filtrados[0] if clientes_filtrados else None
 
-    def recuperar_conta_cliente(cliente):
+    def recuperar_conta_cliente(self, cliente):
         if not cliente.contas: print("\n @@@ Usuário não encontrado @@@") ; return
         return cliente.contas[0]
 
-    def depositar(clientes):
+    def depositar(self):
         cpf = input("Informe o CPF do cliente: ")
-        cliente = filtrar_cliente(cpf, clientes)
+        cliente = self.filtrar_cliente(cpf)
 
         if not cliente: print("\n @@@ Cliente não encontrado @@@"); return
         
         valor = float(input("Informe o valor do depósito: "))
         transacao = Deposito(valor)
 
-        conta = recuperar_conta_cliente(cliente)
+        conta = self.recuperar_conta_cliente(cliente)
         if not conta: return
         
         cliente.realizar_transacao(conta, transacao)
 
-    def sacar(clientes):
+    def sacar(self):
         cpf = input("Informe o CPF do cliente: ")
-        cliente = filtrar_cliente(cpf, clientes)
+        cliente = self.filtrar_cliente(cpf)
 
         if not cliente: print("\n @@@ Cliente não encontrado @@@"); return
         
         valor = float(input("Informe o valor do depósito: "))
         transacao = Saque(valor)
 
-        conta = recuperar_conta_cliente(cliente)
+        conta = self.recuperar_conta_cliente(cliente)
         if not conta: return
         
         cliente.realizar_transacao(conta, transacao)
 
-    def exibir_extrato(clientes):
+    def exibir_extrato(self):
         cpf = input("Informe o CPF do cliente: ")
-        cliente = filtrar_cliente(cpf, clientes)
+        cliente = self.filtrar_cliente(cpf)
 
         if not cliente: print("\n @@@ Cliente não encontrado @@@"); return
         
-        conta = recuperar_conta_cliente(cliente)
+        conta = self.recuperar_conta_cliente(cliente)
         if not conta: return
 
         print("\n============================== EXTRATO ==============================")
@@ -78,9 +94,9 @@ class Logica:
         print(f"\nSaldo:\n\tR$ {conta.saldo:.2f}")
         print("=====================================================================")
 
-    def criar_cliente(clientes):
+    def criar_cliente(self):
         cpf = input("Informe o CPF (somente número): ")
-        cliente = filtrar_cliente(cpf, clientes)
+        cliente = self.filtrar_cliente(cpf)
 
         if cliente:
             print("\n@@@ Já existe cliente com esse CPF! @@@")
@@ -92,60 +108,65 @@ class Logica:
 
         cliente = PessoaFisica(nome=nome, data_nascimento=data_nascimento, cpf=cpf, endereco=endereco)
 
-        clientes.append(cliente)
+        self.clientes.append(cliente)
 
         print("\n=== Cliente criado com sucesso! ===")
 
 
-    def criar_conta(numero_conta, clientes, contas):
+    def criar_conta(self):
+        numero_conta = len(self.contas) + 1
         cpf = input("Informe o CPF do cliente: ")
-        cliente = filtrar_cliente(cpf, clientes)
+        cliente = self.filtrar_cliente(cpf)
 
         if not cliente:
             print("\n@@@ Cliente não encontrado, fluxo de criação de conta encerrado! @@@")
             return
 
         conta = ContaCorrente.nova_conta(cliente=cliente, numero=numero_conta)
-        contas.append(conta)
+        self.contas.append(conta)
         cliente.contas.append(conta)
 
         print("\n=== Conta criada com sucesso! ===")
 
 
-    def listar_contas(contas):
-        for conta in contas:
+    def listar_contas(self):
+        if not self.contas:
+            print("\n @@@ Nenhuma conta Cadastrada! @@@")
+            return 
+        
+        for conta in self.contas:
             print("=" * 100)
             print(textwrap.dedent(str(conta)))
 
+def main():
+    banco = Logica()
 
-    def main():
-        clientes = []
-        contas = []
+    while True:
+        opcao = banco.menu()
 
-        while True:
-            opcao = menu()
+        if opcao == "d":
+           banco.depositar()
 
-            if opcao == "d":
-                depositar(clientes)
+        elif opcao == "s":
+            banco.sacar()
 
-            elif opcao == "s":
-                sacar(clientes)
+        elif opcao == "e":
+            banco.exibir_extrato()
 
-            elif opcao == "e":
-                exibir_extrato(clientes)
+        elif opcao == "nu":
+            banco.criar_cliente()
 
-            elif opcao == "nu":
-                criar_cliente(clientes)
+        elif opcao == "nc":
+            banco.criar_conta()
 
-            elif opcao == "nc":
-                numero_conta = len(contas) + 1
-                criar_conta(numero_conta, clientes, contas)
+        elif opcao == "lc":
+            banco.listar_contas()
 
-            elif opcao == "lc":
-                listar_contas(contas)
+        elif opcao == "q":
+            break
 
-            elif opcao == "q":
-                break
+        else:
+            print("\n@@@ Operação inválida, por favor selecione novamente a operação desejada. @@@")
 
-            else:
-                print("\n@@@ Operação inválida, por favor selecione novamente a operação desejada. @@@")
+
+main()
