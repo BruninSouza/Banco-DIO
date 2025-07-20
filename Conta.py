@@ -77,5 +77,5 @@ class ContaCorrente(Conta):
         return f"""\
             Agencia:\t{self.agencia}
             C/C:\t\t{self.numero}
-            titular:\t{self.cliente}
+            titular:\t{self.cliente.nome}
         """
