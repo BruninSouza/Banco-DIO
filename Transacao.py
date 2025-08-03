@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod, abstractproperty, abstractclassmethod
 
 class Transacao(ABC):
     @property
@@ -6,7 +6,7 @@ class Transacao(ABC):
     def valor(self):
         pass
 
-    @abstractmethod
+    @abstractclassmethod
     def registrar(self, conta):
         pass
 

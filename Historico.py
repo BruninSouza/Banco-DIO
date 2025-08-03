@@ -1,5 +1,4 @@
 from datetime import datetime
-from Transacao import Transacao, Saque, Deposito
 
 class Historico:
     def __init__(self):
@@ -17,3 +16,18 @@ class Historico:
                 "data": datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
             }
         )
+        
+    def gerar_relatorio(self, tipo_transacao=None):
+        for transacao in self._transacoes:
+            if tipo_transacao is None or transacao["tipo"].lower == tipo_transacao.lower():
+                yield transacao
+    
+    def transacoes_do_dia(self):
+        transacoes = []
+        dia_atual = datetime.utcnow().date()
+
+        for transacao in self._transacoes:
+            data_transacao = datetime.strptime(transacao["data", "%d-%m-%Y %H:%M:%S"])
+            if data_transacao == dia_atual:
+                transacoes.append(data_transacao)
+        return transacoes

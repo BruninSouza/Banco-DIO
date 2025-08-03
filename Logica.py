@@ -1,10 +1,10 @@
 import textwrap
 from datetime import datetime
 
-from Conta import Conta, ContaCorrente
-from Historico import Historico
-from Transacao import Saque, Deposito, Transacao
-from Cliente import Cliente, PessoaFisica
+from Conta import ContaCorrente
+from Transacao import Saque, Deposito
+from Cliente import PessoaFisica
+from Utils import Decorador, Iterador
 
 class Logica:
 
@@ -26,14 +26,12 @@ class Logica:
         [d]\tDepositar
         [s]\tSacar
         [e]\tExtrato
+        [nu]\tNovo usuário
         [nc]\tNova conta
         [lc]\tListar contas
-        [nu]\tNovo usuário
         [q]\tSair
         => """
         return input(textwrap.dedent(menu))
-
-
 
     def filtrar_cliente(self, cpf):
         clientes_filtrados = [cliente for cliente in self.clientes if cliente.cpf == cpf]
@@ -43,6 +41,7 @@ class Logica:
         if not cliente.contas: print("\n @@@ Usuário não encontrado @@@") ; return
         return cliente.contas[0]
 
+    @Decorador.log_transacao
     def depositar(self):
         cpf = input("Informe o CPF do cliente: ")
         cliente = self.filtrar_cliente(cpf)
@@ -57,6 +56,7 @@ class Logica:
         
         cliente.realizar_transacao(conta, transacao)
 
+    @Decorador.log_transacao
     def sacar(self):
         cpf = input("Informe o CPF do cliente: ")
         cliente = self.filtrar_cliente(cpf)
@@ -71,6 +71,7 @@ class Logica:
         
         cliente.realizar_transacao(conta, transacao)
 
+    @Decorador.log_transacao
     def exibir_extrato(self):
         cpf = input("Informe o CPF do cliente: ")
         cliente = self.filtrar_cliente(cpf)
@@ -81,19 +82,22 @@ class Logica:
         if not conta: return
 
         print("\n============================== EXTRATO ==============================")
-        transacoes = conta.historico.transacoes
         extrato = ""
+        tem_transacao = False 
+        transacoes = conta.historico.transacoes
 
-        if not transacoes:
+        for transacao in conta.historico.gerar_relatorio():
+            tem_transacao = True
+            extrato += f"\n{transacao['tipo']:<8}\tR$ {transacao['valor']:.2f}\t{transacao['data']}"
+
+        if not tem_transacao:
             extrato = "Não foram realizadas movimentações."
-        else:
-            for transacao in transacoes:
-                extrato += f"\n{transacao['tipo']}:\n\tR$ {transacao['valor']:.2f}"
 
         print(extrato)
-        print(f"\nSaldo:\n\tR$ {conta.saldo:.2f}")
+        print(f"\nSaldo:\tR$ {conta.saldo:.2f}")
         print("=====================================================================")
-
+    
+    @Decorador.log_transacao
     def criar_cliente(self):
         cpf = input("Informe o CPF (somente número): ")
         cliente = self.filtrar_cliente(cpf)
@@ -110,9 +114,10 @@ class Logica:
 
         self.clientes.append(cliente)
 
-        print("\n=== Cliente criado com sucesso! ===")
+        print("\n=== Cliente cadastra com sucesso! ===")
 
 
+    @Decorador.log_transacao
     def criar_conta(self):
         numero_conta = len(self.contas) + 1
         cpf = input("Informe o CPF do cliente: ")
@@ -128,13 +133,9 @@ class Logica:
 
         print("\n=== Conta criada com sucesso! ===")
 
-
+    @Decorador.log_transacao
     def listar_contas(self):
-        if not self.contas:
-            print("\n @@@ Nenhuma conta Cadastrada! @@@")
-            return 
-        
-        for conta in self.contas:
+        for conta in Iterador(self.contas):
             print("=" * 100)
             print(textwrap.dedent(str(conta)))
 
@@ -143,7 +144,7 @@ def main():
 
     while True:
         opcao = banco.menu()
-
+        
         if opcao == "d":
            banco.depositar()
 

@@ -59,13 +59,13 @@ class Conta:
 class ContaCorrente(Conta):
     def __init__(self, numero, cliente, limite=500, limite_saques = 3):
         super().__init__(numero, cliente)
-        self.limite = limite
-        self.limite_saques = limite_saques
+        self._limite = limite
+        self._limite_saques = limite_saques
 
     def sacar(self, valor):
-        numero_saques = len({transacao for transacao in self.historico.transacoes if transacao["tipo"] == Saque.__name__})
-        excedeu_saques = numero_saques > self.limite_saques
-        excedeu_limite = valor > self.limite
+        numero_saques = len([transacao for transacao in self.historico.transacoes if transacao["tipo"] == Saque.__name__])
+        excedeu_saques = numero_saques >= self._limite_saques
+        excedeu_limite = valor > self._limite
         
         if excedeu_saques: print("\n@@@ Operação falhou! Você excedeu o limite diário de saques. @@@")
         elif excedeu_limite: print("\n @@@ Operação falhou! Você ultrapassou o valor máximo permitido num saque. @@@")
